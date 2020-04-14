@@ -13,21 +13,21 @@ num_nodes.to_i.times do |node|
 
   # Create the node's environment group
   classifier_request('Post', 'groups', {
-    name: "#{node_name}",
-    parent: env_group_parent_id,
-    environment: "#{node_name}_environment",
-    environment_trumps: true,
-    rule: rule,
-    classes: {},
+    'name' => "#{node_name}",
+    'parent' => env_group_parent_id,
+    'environment' => "#{node_name}_environment",
+    'environment_trumps' => true,
+    'rule' => rule,
+    'classes' => {},
   })
 
   # Create the node's classes/variables group
   classifier_request('Post', 'groups', {
-    name: "#{node_name}",
-    parent: cv_group_parent_id,
-    rule: rule,
-    classes: {
-      'puppet_enterprise::profile::agent': {},
+    'name' => "#{node_name}",
+    'parent' => cv_group_parent_id,
+    'rule' => rule,
+    'classes' => {
+      'puppet_enterprise::profile::agent' => {},
     },
   })
 end
