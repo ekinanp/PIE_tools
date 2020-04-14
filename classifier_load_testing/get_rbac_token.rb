@@ -1,9 +1,10 @@
-require 'net/http'
-require 'json'
+#!/usr/bin/env ruby
 
-user = ENV['PE_USER']
-password = ENV['PE_PASS']
-instance = ENV['PE_INSTANCE']
+require_relative './helpers'
+
+user = get_env_var('PE_USER')
+password = get_env_var('PE_PASS')
+instance = get_env_var('PE_INSTANCE')
 
 uri = URI.parse("https://#{instance}:4433/rbac-api/v1/auth/token")
 

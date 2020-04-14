@@ -1,9 +1,7 @@
+#!/usr/bin/env ruby
+
 require_relative './helpers'
 
-groupID = ENV['GROUP_ID']
-
-raise "GROUP_ID environment variable not set" if groupID.nil?
-
-# A successfull delete returns a nil output. So we capture the output
-# and swollow it.
-output = classifier_request('Delete', "groups/#{groupID}")
+group_name = get_arg("group_name", 0)
+# A successfull delete returns a nil output so we can just swallow it.
+classifier_request('Delete', "groups/#{get_group_id(group_name)}")
