@@ -62,37 +62,6 @@ begin
   output = {'classesParentGroupID': classesParentGroupID,'environmentsParentGroupID': environmentsParentGroupID,'token': token,}.to_json
   puts output
 
-
-  # Add groups and classes to classifier
-
-  # loopcount.times do
-  #   id = SecureRandom.uuid
-  #   data = {
-  #     id: id,
-  #     name: id,
-  #     environment: 'production',
-  #     parent: '00000000-0000-4000-8000-000000000000',
-  #     rule: ['~', 'name', id],
-  #     classes: {
-  #       'puppet_enterprise::profile::agent': {
-
-  #       }
-  #     }
-  #   }.to_json
-
-  #   uri = URI.parse("https://#{instance}:4433/classifier-api/v1/groups/#{id}?token=#{token}")
-    
-  #   Net::HTTP.start(uri.host, uri.port,
-  #                   use_ssl: uri.scheme == 'https',
-  #                   verify_mode: OpenSSL::SSL::VERIFY_NONE) do |http|
-  #     header = {'Content-Type' => 'application/json' }
-  #     request = Net::HTTP::Put.new("#{uri.path}?#{uri.query}", header)
-  #     request.body = data
-  #     response = http.request(request)
-  #     puts response.body
-  #   end
-  # end
-
 rescue => e
   puts "ERROR: #{e}"
   raise e
