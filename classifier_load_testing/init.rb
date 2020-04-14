@@ -8,6 +8,8 @@ require 'openssl'
 
 require 'securerandom'
 
+require_relative './helpers'
+
 begin
   # Get an API Auth Token
 
@@ -21,28 +23,20 @@ begin
 
   # Get Parent Group IDs
 
-  uri = URI.parse("https://#{instance}:4433/classifier-api/v1/groups?token=#{token}")
-  
-  Net::HTTP.start(uri.host, uri.port,
-                  use_ssl: uri.scheme == 'https',
-                  verify_mode: OpenSSL::SSL::VERIFY_NONE) do |http|
-    header = {'Content-Type' => 'application/json' }
-    request = Net::HTTP::Get.new("#{uri.path}?#{uri.query}", header)
-    response = http.request(request)
-    parsedBody = JSON.parse(response.body)
-    allEnvironmentsGroup = parsedBody.find do |group|
-      group['name'] == 'All Environments'
-    end
-    allEnvironmentsID = allEnvironmentsGroup['id']
-    
-    allNodesGroup = parsedBody.find do |group|
-      group['name'] == 'All Nodes'
-    end
-    allNodesID = allNodesGroup['id']
+  response = classifier_request('Get', 'groups')
+  parsedBody = JSON.parse(response.body)
+
+  allEnvironmentsGroup = parsedBody.find do |group|
+    group['name'] == 'All Environments'
   end
+  allEnvironmentsID = allEnvironmentsGroup['id']
+  
+  allNodesGroup = parsedBody.find do |group|
+    group['name'] == 'All Nodes'
+  end
+  allNodesID = allNodesGroup['id']
 
   # Add Parent Groups
-  uri = URI.parse("https://#{instance}:4433/classifier-api/v1/groups?token=#{token}")
 
   data = {
     name: 'all-snow-environments',
@@ -50,34 +44,20 @@ begin
     parent: allEnvironmentsID,
     description: 'snow environments collection',
     classes: {},
-  }.to_json
-  
-  Net::HTTP.start(uri.host, uri.port,
-                  use_ssl: uri.scheme == 'https',
-                  verify_mode: OpenSSL::SSL::VERIFY_NONE) do |http|
-    header = {'Content-Type' => 'application/json' }
-    request = Net::HTTP::Post.new("#{uri.path}?#{uri.query}", header)
-    request.body = data
-    response = http.request(request)
-    environmentsParentGroupID = response.header['location'].split('/')[-1]
-  end
+  }
+
+  response = classifier_request('Post','groups', data)
+  environmentsParentGroupID = response.header['location'].split('/')[-1]
 
   data = {
     name: 'all-snow-classes-vars',
     parent: allNodesID,
     description: 'snow classes and vars',
     classes: {},
-  }.to_json
-  
-  Net::HTTP.start(uri.host, uri.port,
-                  use_ssl: uri.scheme == 'https',
-                  verify_mode: OpenSSL::SSL::VERIFY_NONE) do |http|
-    header = {'Content-Type' => 'application/json' }
-    request = Net::HTTP::Post.new("#{uri.path}?#{uri.query}", header)
-    request.body = data
-    response = http.request(request)
-    classesParentGroupID = response.header['location'].split('/')[-1]
-  end
+  }
+
+  response = classifier_request('Post','groups', data)
+  classesParentGroupID = response.header['location'].split('/')[-1]
 
   output = {'classesParentGroupID': classesParentGroupID,'environmentsParentGroupID': environmentsParentGroupID,'token': token,}.to_json
   puts output
