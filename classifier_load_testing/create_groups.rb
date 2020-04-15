@@ -8,11 +8,17 @@ start_at = get_arg("start_at", 1).to_i
 env_group_parent_id = get_group_id('all-snow-environments')
 cv_group_parent_id = get_group_id('all-snow-classes-vars')
 
+starting = Time.now
+
 num_nodes.to_i.times do |node|
   node = node + start_at
   node_name = "node#{node}"
   if (node % 100) == 0
+    ending = Time.now
+    elapsed = ending - starting
+    puts elapsed
     puts(node_name)
+    starting = Time.now
   end
 
   if (node % 1000) == 0
