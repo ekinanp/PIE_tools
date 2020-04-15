@@ -15,6 +15,10 @@ num_nodes.to_i.times do |node|
     puts(node_name)
   end
 
+  if (node % 1000) == 0
+    sleep 3
+  end
+
   rule = ["=", "name", node_name]
 
   # Create the node's environment group
@@ -33,6 +37,6 @@ num_nodes.to_i.times do |node|
     'parent' => cv_group_parent_id,
     'rule' => rule,
     'classes' => {},
-    'variables' => {'foo': 5},
+    'variables' => {'foo' => 5},
   })
 end
