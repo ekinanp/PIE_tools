@@ -34,9 +34,12 @@ def classifier_request(verb, endpoint, data = nil)
   end
 end
 
-def get_group_id(group_name)
-  allGroups = classifier_request('Get', 'groups').response.body
-  group = JSON.parse(allGroups).find do |g|
+def get_group_id(group_name, allGroups = nil)
+  allGroups = classifier_request('Get', 'groups').response.body if allGroups.nil?
+
+  allGroups = JSON.parse(allGroups) unless allGroups.class == Array
+
+  group = allGroups.find do |g|
     g['name'] == group_name
   end
   raise "'#{group_name}' group not found" if group.nil?
