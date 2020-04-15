@@ -3,13 +3,19 @@
 require_relative './helpers'
 
 num_nodes = get_arg("num_nodes", 0)
+start_at = get_arg("start_at", 1).to_i
 
 env_group_parent_id = get_group_id('all-snow-environments')
 cv_group_parent_id = get_group_id('all-snow-classes-vars')
 
 num_nodes.to_i.times do |node|
+  node = node + start_at
   node_name = "node#{node}"
-  rule = ["~", "name", node_name]
+  if (node % 100) == 0
+    puts(node_name)
+  end
+
+  rule = ["=", "name", node_name]
 
   # Create the node's environment group
   classifier_request('Post', 'groups', {
@@ -26,8 +32,7 @@ num_nodes.to_i.times do |node|
     'name' => "#{node_name}_classes_vars",
     'parent' => cv_group_parent_id,
     'rule' => rule,
-    'classes' => {
-      'puppet_enterprise::profile::agent' => {},
-    },
+    'classes' => {},
+    'variables' => {'foo': 5},
   })
 end
