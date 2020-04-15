@@ -9,7 +9,11 @@ cv_group_parent_id = get_group_id('all-snow-classes-vars')
 
 num_nodes.to_i.times do |node|
   node_name = "node#{node}"
-  rule = ["~", "name", node_name]
+  if (node % 100) == 0
+    puts(node_name)
+  end
+
+  rule = ["=", "name", node_name]
 
   # Create the node's environment group
   classifier_request('Post', 'groups', {

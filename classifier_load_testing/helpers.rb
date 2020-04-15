@@ -35,6 +35,11 @@ def classifier_request(verb, endpoint, data = nil)
 end
 
 def get_group_id(group_name, allGroups = nil)
+  group = get_group(group_name, allGroups)
+  group['id']
+end
+
+def get_group(group_name, allGroups = nil)
   allGroups = classifier_request('Get', 'groups').response.body if allGroups.nil?
 
   allGroups = JSON.parse(allGroups) unless allGroups.class == Array
@@ -43,7 +48,7 @@ def get_group_id(group_name, allGroups = nil)
     g['name'] == group_name
   end
   raise "'#{group_name}' group not found" if group.nil?
-  group['id']
+  group
 end
 
 def delete_children(parent_group_id)
