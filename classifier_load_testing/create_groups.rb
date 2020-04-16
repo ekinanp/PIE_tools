@@ -8,21 +8,18 @@ start_at = get_arg("start_at", 1).to_i
 env_group_parent_id = get_group_id('all-snow-environments')
 cv_group_parent_id = get_group_id('all-snow-classes-vars')
 
-starting = Time.now
-overallStartTime = Time.now
+File.write('timing.csv',"node, group, parent, elapsedTime \n")
 
 num_nodes.to_i.times do |node|
   node = node + start_at
   node_name = "node#{node}"
   if (node % 100) == 0
-    ending = Time.now
-    elapsed = ending - starting
-    puts elapsed
     puts(node_name)
-    starting = Time.now
   end
 
   rule = ["=", "name", node_name]
+
+  startTime = Time.now
 
   # Create the node's environment group
   classifier_request('Post', 'groups', {
@@ -34,6 +31,12 @@ num_nodes.to_i.times do |node|
     'classes' => {},
   })
 
+  endTime = Time.now
+
+  File.write('timing.csv', "#{node_name}, #{node_name}_environment, all-snow-environments, #{endTime - startTime}\n", mode: 'a')
+
+  startTime = Time.now
+
   # Create the node's classes/variables group
   classifier_request('Post', 'groups', {
     'name' => "#{node_name}_classes_vars",
@@ -43,7 +46,11 @@ num_nodes.to_i.times do |node|
     'variables' => {'foo' => 5},
   })
 
-  sleep 1
+  endTime = Time.now
+
+  File.write('timing.csv', "#{node_name}, #{node_name}_classes_vars, all-snow-classes-vars, #{endTime - startTime}\n", mode: 'a')
+
+  sleep 5
 end
 
 overallEndTime = Time.now
