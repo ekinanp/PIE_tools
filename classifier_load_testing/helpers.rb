@@ -57,3 +57,27 @@ def delete_children(parent_group_id)
     classifier_request("delete", "groups/#{child['id']}")
   end
 end
+
+def with_retry(op_name, retries, retry_delay, &block)
+  nth_invocation = -1
+  begin
+    nth_invocation = nth_invocation + 1
+    block.call()
+  rescue => e
+    puts("Failed '#{op_name}': #{e}")
+    # Raising in begin will cause an infinite loop due to the rescue
+    if nth_invocation >= retries
+      raise "'#{op_name}' failed after #{retries} retries"
+    end
+    puts("Retrying in #{retry_delay} seconds ...")
+    sleep retry_delay
+    retry
+  end
+end
+
+def time_block(&block)
+  startTime = Time.now
+  block.call()
+  endTime = Time.now
+  endTime - startTime
+end

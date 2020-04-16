@@ -19,52 +19,50 @@ if create_csv
   File.write('timing.csv',"node, group, parent, elapsedTime \n")
 end
 
-overallStartTime = Time.now
-
-num_nodes.to_i.times do |node|
-  node = node + start_at
-  node_name = "node#{node}"
-  if (node % 100) == 0
-    puts(node_name)
+overallElapsedTime = time_block do
+  # Common helper that removes the "with_retry", "time_block" clutter.
+  # Helper returns how long it took to create the group.
+  create_group = lambda do |group|
+    retryDelay = per_node_delay.zero? ? 5 : 5 * per_node_delay
+    with_retry("Create the #{group['name']} group", 3, retryDelay) do
+      time_block do
+        classifier_request('Post', 'groups', group)
+      end
+    end
   end
 
-  rule = ["=", "name", node_name]
+  num_nodes.to_i.times do |node|
+    node = node + start_at
+    node_name = "node#{node}"
+    if (node % 100) == 0
+      puts(node_name)
+    end
 
-  startTime = Time.now
+    rule = ["=", "name", node_name]
 
-  # Create the node's environment group
-  classifier_request('Post', 'groups', {
-    'name' => "#{node_name}_environment",
-    'parent' => env_group_parent_id,
-    'environment' => "#{node_name}_environment",
-    'environment_trumps' => true,
-    'rule' => rule,
-    'classes' => {},
-  })
+    # Create the node's environment group
+    envGroupElapsedTime = create_group.call({
+      'name' => "#{node_name}_environment",
+      'parent' => env_group_parent_id,
+      'environment' => "#{node_name}_environment",
+      'environment_trumps' => true,
+      'rule' => rule,
+      'classes' => {},
+    })
+    File.write('timing.csv', "#{node_name}, #{node_name}_environment, all-snow-environments, #{envGroupElapsedTime}\n", mode: 'a')
 
-  endTime = Time.now
+    # Create the node's classes/variables group
+    cvGroupElapsedTime = create_group.call({
+      'name' => "#{node_name}_classes_vars",
+      'parent' => cv_group_parent_id,
+      'rule' => rule,
+      'classes' => {},
+      'variables' => {'foo' => 5},
+    })
+    File.write('timing.csv', "#{node_name}, #{node_name}_classes_vars, all-snow-classes-vars, #{cvGroupElapsedTime}\n", mode: 'a')
 
-  File.write('timing.csv', "#{node_name}, #{node_name}_environment, all-snow-environments, #{endTime - startTime}\n", mode: 'a')
-
-  startTime = Time.now
-
-  # Create the node's classes/variables group
-  classifier_request('Post', 'groups', {
-    'name' => "#{node_name}_classes_vars",
-    'parent' => cv_group_parent_id,
-    'rule' => rule,
-    'classes' => {},
-    'variables' => {'foo' => 5},
-  })
-
-  endTime = Time.now
-
-  File.write('timing.csv', "#{node_name}, #{node_name}_classes_vars, all-snow-classes-vars, #{endTime - startTime}\n", mode: 'a')
-
-  sleep per_node_delay
+    sleep per_node_delay
+  end
 end
 
-overallEndTime = Time.now
-
-overallElapsed = overallEndTime - overallStartTime
-puts overallElapsed
+puts overallElapsedTime
