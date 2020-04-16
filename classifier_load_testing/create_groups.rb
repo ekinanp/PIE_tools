@@ -9,6 +9,7 @@ env_group_parent_id = get_group_id('all-snow-environments')
 cv_group_parent_id = get_group_id('all-snow-classes-vars')
 
 starting = Time.now
+overallStartTime = Time.now
 
 num_nodes.to_i.times do |node|
   node = node + start_at
@@ -19,10 +20,6 @@ num_nodes.to_i.times do |node|
     puts elapsed
     puts(node_name)
     starting = Time.now
-  end
-
-  if (node % 1000) == 0
-    sleep 3
   end
 
   rule = ["=", "name", node_name]
@@ -45,4 +42,11 @@ num_nodes.to_i.times do |node|
     'classes' => {},
     'variables' => {'foo' => 5},
   })
+
+  sleep 1
 end
+
+overallEndTime = Time.now
+
+overallElapsed = overallEndTime - overallStartTime
+puts overallElapsed
